@@ -9,13 +9,14 @@
 #include <TFile.h>
 #include <sstream>
 #include <TF1.h>
+#include <fstream>
 // Global
 TH1D* h2;
 TH1D* h1;
 TH1* myHist;
 
 void UpdateDisplay(TFile*, int);
-void FitPeak(TFile*, int, int, int);
+TF1* FitPeak(TFile*, int, int, int);
 
 int main(int argc, char *argv[])
 {
@@ -35,8 +36,12 @@ int main(int argc, char *argv[])
   int histN=0;
   char tryagain='n';
   char dumbass='n';
+
+  std::ofstream outfile;
+  outfile.open ("example.txt");
+  
   do{
-    std::cout << "Hit enter to proceed, or 'f' to fit" << std::endl;
+
   gSystem->ProcessEvents();
   histN++;
   termin = std::cin.get();
@@ -47,6 +52,7 @@ int main(int argc, char *argv[])
   }  
   if((termin == 'f' || termin == 'F' || tryagain == 'y' ) && histN > 1){
     // Do fit
+    TF1* myFit;
     if ( dumbass == 'n' ){
     std::cout << "Enter the minimum bin value and press enter" << std::endl;
     int minBin;
@@ -58,7 +64,7 @@ int main(int argc, char *argv[])
     histN -= 1;
 
       UpdateDisplay(myFile,histN);
-      FitPeak(myFile,histN, minBin, maxBin);
+      myFit = FitPeak(myFile,histN, minBin, maxBin);
       termin = std::cin.get();
       c->Modified();
       c->Update();
@@ -72,6 +78,8 @@ int main(int argc, char *argv[])
     
     if ( termin == 'y' ){
       std::cout << "OK. Writing fit parameters to file. Hit enter to proceed to next bar." << std::endl;
+      std::cout << "Fit params: " << myFit->GetParameter(0) << std::endl;
+      outfile << histN << " " << myFit->GetParameter(0) << " " << myFit->GetParameter(1) << " " << myFit->GetParameter(2) << std::endl;
       gSystem->ProcessEvents();
       termin = std::cin.get();
       tryagain = 'n';
@@ -92,19 +100,25 @@ int main(int argc, char *argv[])
       dumbass = 'y';
       }
   }
+  if ( termin == 'q' ){
+    exit(0);
+  }
   else{
     //    termin = std::cin.get();
     UpdateDisplay(myFile,histN);
     c->Modified();
     c->Update();
-
+    std::cout << "Hit enter to proceed, or 'f' to fit" << std::endl;
   }
 
 
   }while(true);
-  
+
+  outfile.close();
   return 0;
 }
+
+
 void UpdateDisplay(TFile* myFile, int histN){
   std::stringstream histNameStream;
   histNameStream << "hESpecFhgBhg" << histN;
@@ -116,13 +130,13 @@ void UpdateDisplay(TFile* myFile, int histN){
     //    h1->Draw("hist");
     //  }
 }
-void FitPeak(TFile* myFile, int histN, int minBin, int maxBin){
-  //  int minBin360 =1700;
-  //  int maxBin360 = 3000;
+TF1* FitPeak(TFile* myFile, int histN, int minBin, int maxBin){
+
   std::stringstream histNameStream;
   histNameStream << "hESpecFhgBhg" << histN;
   myFile->GetObject(histNameStream.str().c_str(),myHist);
   TF1 *fa1 = new TF1("fa1","gaus",minBin,maxBin);
   myHist->Fit("fa1","","",minBin,maxBin);
   fa1->Draw("same");
+  return fa1;
 }
