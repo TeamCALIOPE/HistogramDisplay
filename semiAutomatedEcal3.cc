@@ -30,8 +30,8 @@ int main(int argc, char *argv[])
   //  TFile* myFile = new TFile("133Ba_CenterOfArray.root");
   //TFile* myFile = new TFile("outfile22NaCenterCollimated.root");
   //  TFile* myFile = new TFile("outfile4938.root");
-  TFile* myFile = new TFile("myBaHist.root");
-  //TFile* myFile = new TFile("22Na_test.root");
+  //  TFile* myFile = new TFile("myBaHist.root");
+  TFile* myFile = new TFile("22Na_test.root");
   //  TFile* myFile = new TFile("outfile4940.root");
   //TFile* myFile = new TFile("outfile5004.root");
   //  TFile* myFile = new TFile("outfile4992.root");
@@ -291,13 +291,15 @@ void UpdateDisplay(TFile* myFile, int histN){
   myFile->GetObject(histNameStream1.str().c_str(),myHist1);
   myHist1->SetLineColor(kViolet+3);
   myHist1->SetLineWidth(2);
-  myHist1->Draw("same");
+
   std::stringstream histNameStream2;
   histNameStream2 << "hESpecFhgBlg" << histN << "_z10p";    
   myFile->GetObject(histNameStream2.str().c_str(),myHist2);
   myHist2->SetLineColor(kOrange+9);
   myHist2->SetLineWidth(2);
-  myHist2->Draw("same");
+  myHist2->Draw("hist");
+  myHist1->Draw("same");
+  myHist->Draw("same");
 
 }
 TF1* FitPeak1(TFile* myFile, int histN, int minBin, int maxBin){
